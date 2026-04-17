@@ -21,6 +21,7 @@
             --glass-gold: rgba(236, 72, 153, 0.12);
             --glass-border: rgba(236, 72, 153, 0.22);
             --text-soft: rgba(255, 220, 230, 0.9);
+            --radius: 480px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -126,18 +127,25 @@
             margin: 0 auto;
             position: relative; z-index: 20;
             cursor: grab;
-            touch-action: none;
+            touch-action: pan-y;
             opacity: 0;
             animation: sceneEntrance 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
         }
         @media (max-width: 1024px) { .scene { --scene-scale: 0.9; } }
         @media (max-width: 768px) { .scene { --scene-scale: 0.75; } }
-        @media (max-width: 480px) { .scene { --scene-scale: 0.6; } }
-        @media (max-width: 380px) { .scene { --scene-scale: 0.52; } }
+        @media (max-width: 480px) { 
+            .scene { --scene-scale: 0.6; } 
+            :root { --radius: 260px; }
+        }
+        @media (max-width: 380px) { 
+            .scene { --scene-scale: 0.52; } 
+            :root { --radius: 220px; }
+        }
         @media (max-height: 850px) { .scene { --scene-scale: 0.8; } }
         @media (max-height: 700px) { .scene { --scene-scale: 0.65; } }
         @media (max-height: 500px) and (orientation: landscape) {
             .scene { --scene-scale: 0.45; margin-top: -30px; }
+            :root { --radius: 200px; }
             .hero-hint { display: none; }
             .controls { margin-top: -10px; }
         }
@@ -152,7 +160,7 @@
             width: 100%; height: 100%;
             position: absolute;
             transform-style: preserve-3d;
-            transform: translateZ(-480px) rotateY(0deg);
+            transform: translateZ(calc(-1 * var(--radius))) rotateY(0deg);
             will-change: transform;
             transition: transform .6s cubic-bezier(.25,.8,.25,1);
         }
@@ -165,12 +173,12 @@
             transform-style: preserve-3d;
             user-select: none;
         }
-        .flip-card:nth-child(1) { transform: rotateY(0deg) translateZ(480px); }
-        .flip-card:nth-child(2) { transform: rotateY(60deg) translateZ(480px); }
-        .flip-card:nth-child(3) { transform: rotateY(120deg) translateZ(480px); }
-        .flip-card:nth-child(4) { transform: rotateY(180deg) translateZ(480px); }
-        .flip-card:nth-child(5) { transform: rotateY(240deg) translateZ(480px); }
-        .flip-card:nth-child(6) { transform: rotateY(300deg) translateZ(480px); }
+        .flip-card:nth-child(1) { transform: rotateY(0deg) translateZ(var(--radius)); }
+        .flip-card:nth-child(2) { transform: rotateY(60deg) translateZ(var(--radius)); }
+        .flip-card:nth-child(3) { transform: rotateY(120deg) translateZ(var(--radius)); }
+        .flip-card:nth-child(4) { transform: rotateY(180deg) translateZ(var(--radius)); }
+        .flip-card:nth-child(5) { transform: rotateY(240deg) translateZ(var(--radius)); }
+        .flip-card:nth-child(6) { transform: rotateY(300deg) translateZ(var(--radius)); }
 
         .flip-card-inner {
             position: relative; width: 100%; height: 100%;
@@ -665,13 +673,17 @@
         // ──────────────── CAROUSEL DRAG ────────────────
         const scene = document.getElementById('carousel-scene');
         const carousel = document.getElementById('carousel-spinner');
-        const RADIUS = 480; // Responsive geometric scale handled in CSS
         let currentAngle = 0, startX = 0, isDragging = false, prevAngle = 0;
         window.hasDragged = false;
 
+        function getRadius() {
+            return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--radius'));
+        }
+
         function setCarousel(angle, instant) {
+            const radius = getRadius();
             carousel.style.transition = instant ? 'none' : 'transform .6s cubic-bezier(.25,.8,.25,1)';
-            carousel.style.transform = `translateZ(-${RADIUS}px) rotateY(${angle}deg)`;
+            carousel.style.transform = `translateZ(-${radius}px) rotateY(${angle}deg)`;
         }
 
         scene.addEventListener('mousedown', e => { isDragging=true; window.hasDragged=false; startX=e.pageX; prevAngle=currentAngle; carousel.style.transition='none'; });
