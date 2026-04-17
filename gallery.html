@@ -2,7 +2,7 @@
 <html lang="ar" dir="ltr">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" name="viewport"/>
     <title>Lamar's Room ✦</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌹</text></svg>">
     <meta name="theme-color" content="#1c0512">
@@ -25,17 +25,25 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
         body {
             font-family: 'Cormorant Garamond', serif;
             background: var(--bg);
             color: var(--text);
-            min-height: 100vh;
-            overflow: hidden;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
         }
 
         /* Background layers */
-        #bg-canvas { position: fixed; inset: 0; z-index: 0; }
-        .aurora { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; opacity: 0.8; }
+        #bg-canvas { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+        .aurora { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; opacity: 0.8; }
         .aurora-layer { position: absolute; border-radius: 50%; will-change: transform; animation: drift 20s ease-in-out infinite alternate; }
         .a1 { width: 80vw; height: 70vh; background: radial-gradient(ellipse, rgba(190, 24, 93, 0.5) 0%, transparent 70%); top: -20%; left: -20%; animation-duration: 25s; }
         .a2 { width: 60vw; height: 80vh; background: radial-gradient(ellipse, rgba(236, 72, 153, 0.5) 0%, transparent 70%); bottom: -20%; right: -20%; animation-duration: 18s; animation-delay: -10s; }
@@ -48,9 +56,10 @@
         header {
             position: fixed; top: 0; width: 100%; z-index: 50;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 1rem 2rem;
+            padding: calc(0.5rem + env(safe-area-inset-top)) 2rem 1rem 2rem;
             background: rgba(7,0,15,0.4);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--glass-border);
         }
         .logo {
@@ -80,9 +89,15 @@
         /* Scroll container */
         .page-scroll {
             position: relative; z-index: 10;
-            height: 100vh; overflow-y: auto; overflow-x: hidden;
-            padding-top: 80px; padding-bottom: 40px;
+            height: 100dvh; width: 100%;
+            overflow-y: auto; overflow-x: hidden;
+            padding-top: calc(80px + env(safe-area-inset-top)); 
+            padding-bottom: calc(40px + env(safe-area-inset-bottom));
             scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
         }
         .page-scroll::-webkit-scrollbar { width: 4px; }
         .page-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -123,23 +138,24 @@
         .scene {
             --scene-scale: 1;
             width: 300px; height: 460px;
-            perspective: 2200px;
+            perspective: 1200px; /* More realistic mobile perspective */
             margin: 0 auto;
             position: relative; z-index: 20;
             cursor: grab;
             touch-action: pan-y;
             opacity: 0;
+            transform-style: preserve-3d;
+            will-change: transform;
             animation: sceneEntrance 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
+            -webkit-perspective: 1200px;
         }
-        @media (max-width: 1024px) { .scene { --scene-scale: 0.9; } }
-        @media (max-width: 768px) { .scene { --scene-scale: 0.75; } }
         @media (max-width: 480px) { 
-            .scene { --scene-scale: 0.6; } 
-            :root { --radius: 260px; }
+            .scene { --scene-scale: 0.55; } 
+            :root { --radius: 240px; }
         }
         @media (max-width: 380px) { 
-            .scene { --scene-scale: 0.52; } 
-            :root { --radius: 220px; }
+            .scene { --scene-scale: 0.48; } 
+            :root { --radius: 200px; }
         }
         @media (max-height: 850px) { .scene { --scene-scale: 0.8; } }
         @media (max-height: 700px) { .scene { --scene-scale: 0.65; } }
@@ -151,7 +167,7 @@
         }
 
         @keyframes sceneEntrance {
-            0% { opacity: 0; transform: scale(calc(var(--scene-scale) * 2.5)); }
+            0% { opacity: 0; transform: scale(calc(var(--scene-scale) * 1.5)); }
             100% { opacity: 1; transform: scale(var(--scene-scale)); }
         }
         .scene:active { cursor: grabbing; }
@@ -171,7 +187,10 @@
             width: 300px; height: 460px;
             left: 0; top: 0;
             transform-style: preserve-3d;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
             user-select: none;
+            will-change: transform;
         }
         .flip-card:nth-child(1) { transform: rotateY(0deg) translateZ(var(--radius)); }
         .flip-card:nth-child(2) { transform: rotateY(60deg) translateZ(var(--radius)); }
@@ -195,10 +214,12 @@
             position: absolute; width: 100%; height: 100%;
             border-radius: 1.8rem;
             backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
             overflow: hidden;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 1.2rem;
             pointer-events: auto;
+            transform-style: preserve-3d;
         }
 
         .card-front {
